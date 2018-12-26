@@ -7,8 +7,9 @@ content-type: application/json
 body: {
     path string,
     preprocessMethod string, // "1-A"
-    featureExtractionMethod string, //"2-A"
-    similarityCalculationMethod string //"3-A"
+    featureExtractionMethod string, // "2-A"
+    similarityCalculationMethod string // "3-A"
+    positionMethod string // "4-A"
 }
 response: {
     status: 200/error code
@@ -42,8 +43,8 @@ response: {
     },
     results: {
         one: {
-            similarity: string, //"99.9%"
-            path: string //path of the most similar image,
+            similarity: string, // "99.9%"
+            path: string // path of the most similar image,
             features: {
                 color: string, // path of the generated image
                 texture: string, // path of the generated image
@@ -51,8 +52,8 @@ response: {
             }
         },
         two: {
-            similarity: string, //"76.2%"
-            path: string, //path of the second similar image
+            similarity: string, // "76.2%"
+            path: string, // path of the second similar image
             features: {
                 color: string, // path of the generated image
                 texture: string, // path of the generated image
@@ -60,7 +61,7 @@ response: {
             }
         },
         three: {
-            similarity: string, //"64.1%"
+            similarity: string, // "64.1%"
             path: string, //path of the third similar image
             features: {
                 color: string, // path of the generated image

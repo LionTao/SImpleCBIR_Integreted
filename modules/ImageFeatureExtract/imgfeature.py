@@ -10,7 +10,6 @@ import numpy as np
 import math
 
 
-
 def feature_color(img_in):
     """
     输入:RGB图像
@@ -21,9 +20,9 @@ def feature_color(img_in):
     vec_color = np.zeros(48, 'uint32')
     for i in range(rows):
         for j in range(cols):
-            b = img[i][j][0] / 16
-            g = img[i][j][1] / 16
-            r = img[i][j][2] / 16
+            b = img_in[i][j][0] / 16
+            g = img_in[i][j][1] / 16
+            r = img_in[i][j][2] / 16
             b = math.floor(b)
             g = math.floor(g)
             r = math.floor(r)
@@ -32,7 +31,6 @@ def feature_color(img_in):
             vec_color[r * 3 + 2] += 1
 
     return vec_color
-
 
 
 def feature_texture(img_in):

@@ -185,7 +185,7 @@ class SLICProcessor(object):
         for i in range(n):
             self.assignment()
             self.update_cluster()
-        self.save_current_image('1.png')
+        #self.save_current_image('1.png')
 
     def get_color_difference(self,ord=2):
         '''

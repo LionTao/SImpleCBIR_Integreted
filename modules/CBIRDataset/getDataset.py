@@ -21,10 +21,10 @@ def ExtractZip(path, des=""):
     import os
     import zipfile
     print("Checking Dataset directory...")
-    if not os.path.exists("dataset"):
-        print("Directory not found.")
-        os.mkdir("dataset")
-        print("Directory successfully created.")
+    # if not os.path.exists("dataset"):
+    #     print("Directory not found.")
+    #     os.mkdir("dataset")
+    #     print("Directory successfully created.")
 
     print("\nStart unzip....This may take a while...")
     file_zip = zipfile.ZipFile(path, 'r')

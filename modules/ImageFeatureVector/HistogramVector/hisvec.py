@@ -55,6 +55,7 @@ def get_vector(file: str) -> numpy.array:
     """
     V = []
     img = cv2.imread(file, flags=0)
+
     length, width = img.shape
     l = 1
     a = [1]

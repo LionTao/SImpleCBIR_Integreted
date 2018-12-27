@@ -44,7 +44,7 @@ def ExtractZip(path, des="."):
         file_zip.extract(file, des + 'dataset/')
         print("\r Progress: {:.2f}%".format((file_zip.namelist().index(file) / len(file_zip.namelist())) * 100), end='')
     file_zip.close()
-    print("[INFO]Unzipping Complete")
+    print("\n[INFO]Unzipping Complete")
 
 
 def GetDataSet(des=''):

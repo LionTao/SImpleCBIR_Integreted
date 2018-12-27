@@ -164,3 +164,4 @@ venv.bak/
 /modules/ObjectDetection/image.jpg
 /testRoot.py
 /main/migrations/
+/dataset/

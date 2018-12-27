@@ -34,4 +34,5 @@ def vec_search(imgpath: str, feats: np.ndarray, names: list, k=3):
         res[i] = np.linalg.norm(temp) / 20
     rank_ID = np.argsort(res)
     namelist = [names[index] for index in rank_ID[0:k]]
-    return namelist
+    sim = [res[index] for index in rank_ID[0:k]]  # similarities
+    return namelist, sim

@@ -20,12 +20,7 @@ def upload_pic(request):
             preprocessMethod = json_body['preprocessMethod']
             featureExtractionMethod = json_body['featureExtractionMethod']
             similarityCalculationMethod = json_body['similarityCalculationMethod']
-            targetDetectMethod = json_body['positionMethod']
-            # ===============================
-
-            # Dataset
-            # ===============================
-            makecache.getDataset()
+            positionMethod = json_body['positionMethod']
             # ===============================
 
             # Temp Dir
@@ -60,15 +55,17 @@ def upload_pic(request):
             # 2
             return_message['precision'] = 'FOO'  # "87.5%" 查准率
             # 3
+            return_message['position'] = 'FOO'  # path of the target marked image
+            # 4
             features = dict()
             features['color'] = 'FOO'  # path of the generated image
             features['texture'] = 'FOO'  # path of the generated image
             features['shape'] = 'FOO'  # path of the generated image
             return_message['features'] = features
 
-            # 4
+            # 5
             results = dict()
-            # 4.1
+            # 5.1
             one = dict()
             one['similarity'] = 'FOO'
             one['path'] = 'FOO'
@@ -76,8 +73,9 @@ def upload_pic(request):
             one_features['color'] = 'FOO'
             one_features['texture'] = 'FOO'
             one_features['shape'] = 'FOO'
+            one_features['position'] = 'FOO'
             one['features'] = one_features
-            # 4.2
+            # 5.2
             two = dict()
             two['similarity'] = 'FOO'
             two['path'] = 'FOO'
@@ -85,8 +83,9 @@ def upload_pic(request):
             two_features['color'] = 'FOO'
             two_features['texture'] = 'FOO'
             two_features['shape'] = 'FOO'
+            two_features['position'] = 'FOO'
             two['features'] = two_features
-            # 4.3
+            # 5.3
             three = dict()
             three['similarity'] = 'FOO'
             three['path'] = 'FOO'
@@ -94,8 +93,9 @@ def upload_pic(request):
             three_features['color'] = 'FOO'
             three_features['texture'] = 'FOO'
             three_features['shape'] = 'FOO'
+            three_features['position'] = 'FOO'
             three['features'] = three_features
-            # 4
+            # 5
             results['one'] = one
             results['two'] = two
             results['three'] = three

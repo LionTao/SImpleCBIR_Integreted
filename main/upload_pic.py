@@ -8,6 +8,8 @@ import cv2
 import main.makecache as makecache
 from main.models import cache
 from main.img_preprocess import preprocess
+from modules.CNNCBIR import search_api
+import main.search_utils as search_utils
 
 
 @csrf_exempt
@@ -35,38 +37,42 @@ def upload_pic(request):
             # ===============================
             # Preprocess
             if preprocessMethod == 'hist_canny':
-                usr_img = preprocess(cv2.imread(path, 1))
+                usr_img = cv2.imread(path, 1)
+                usr_img_pre = preprocess(usr_img)
+                usr_img_pre_dir = temp_dir + 'usr_img_pre.jpg'
+                cv2.imwrite(usr_img_pre_dir, usr_img_pre)
+            else:
+                raise Exception("Preprocess Method Unknown.")
 
             # Similarity
+            res_num = 3
             if similarityCalculationMethod == 'vector':
                 pass
             elif similarityCalculationMethod == 'cnn':
-                pass
+                imgNames = cache.path.objects.all()
+                feats = cache.cnn.objects.all()
+                result = search_api.search_with_cnnData(usr_img_pre_dir, feats, imgNames, res_num)
 
-            # FeatureExtraction
-            if featureExtractionMethod == 'color':
-                return_img = 'x'
-            elif featureExtractionMethod == 'texture':
-                pass
-            elif featureExtractionMethod == 'shape':
-                pass
+            for i in range(res_num):
+                cv2.imwrite(temp_dir + "res{}.jpg".format(i + 1), result[i])
 
             # ObjectDetection
             if positionMethod == 'od':
-                pass
+                objd_image, catagory = search_utils.ObjDetect(usr_img_pre_dir)
+                cv2.imwrite(temp_dir + 'usr_objd.jpg', objd_image)
 
             # ===============================
 
             # Generate the json
             # ===============================
             # 0
-            return_message['rawImage'] = 'FOO'  # the raw path
+            return_message['rawImage'] = usr_img_pre_dir  # the raw path
             # 1
             return_message['recallRatio'] = 'FOO'  # "92.5%" 查全率
             # 2
             return_message['precision'] = 'FOO'  # "87.5%" 查准率
             # 3
-            return_message['position'] = 'FOO'  # path of the target marked image
+            return_message['position'] = temp_dir + 'usr_objd.jpg'  # path of the target marked image
             # 4
             features = dict()
             features['color'] = 'FOO'  # path of the generated image
@@ -79,32 +85,32 @@ def upload_pic(request):
             # 5.1
             one = dict()
             one['similarity'] = 'FOO'
-            one['path'] = 'FOO'
+            one['path'] = temp_dir + 'res1.jpg'
             one_features = dict()
-            one_features['color'] = 'FOO'
-            one_features['texture'] = 'FOO'
-            one_features['shape'] = 'FOO'
-            one_features['position'] = 'FOO'
+            one_features['color'] = temp_dir + 'color1.jpg'
+            one_features['texture'] = temp_dir + 'texture1.jpg'
+            one_features['shape'] = temp_dir + 'shape1.jpg'
+            one_features['position'] = temp_dir + 'position1.jpg'
             one['features'] = one_features
             # 5.2
             two = dict()
             two['similarity'] = 'FOO'
-            two['path'] = 'FOO'
+            two['path'] = temp_dir + 'res2.jpg'
             two_features = dict()
-            two_features['color'] = 'FOO'
-            two_features['texture'] = 'FOO'
-            two_features['shape'] = 'FOO'
-            two_features['position'] = 'FOO'
+            two_features['color'] = temp_dir + 'color2.jpg'
+            two_features['texture'] = temp_dir + 'texture2.jpg'
+            two_features['shape'] = temp_dir + 'shape2.jpg'
+            two_features['position'] = temp_dir + 'position2.jpg'
             two['features'] = two_features
             # 5.3
             three = dict()
             three['similarity'] = 'FOO'
-            three['path'] = 'FOO'
+            three['path'] = temp_dir + 'res1.jpg'
             three_features = dict()
-            three_features['color'] = 'FOO'
-            three_features['texture'] = 'FOO'
-            three_features['shape'] = 'FOO'
-            three_features['position'] = 'FOO'
+            three_features['color'] = temp_dir + 'color3.jpg'
+            three_features['texture'] = temp_dir + 'texture3.jpg'
+            three_features['shape'] = temp_dir + 'shape3.jpg'
+            three_features['position'] = temp_dir + 'position3.jpg'
             three['features'] = three_features
             # 5
             results['one'] = one

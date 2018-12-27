@@ -92,9 +92,9 @@ def initCNNCache(dataset_path="dataset", dbpath=".") -> None:
     import os
     # import sqlite3
     from modules.CNNCBIR.CreateMobileNet import initMobileNet, extract_feat
-    dbname = dbpath + "/index.sqlite"
-    if os.path.exists(dbname):
-        os.remove(dbname)
+    #dbname = dbpath + "/index.sqlite"
+    # if os.path.exists(dbname):
+    #     os.remove(dbname)
     # conn = sqlite3.connect(dbname)
     # cursor = conn.cursor()
     #

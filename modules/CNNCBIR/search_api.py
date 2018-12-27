@@ -83,28 +83,28 @@ def initCNNCache(dataset_path="dataset", dbpath=".") -> None:
     """
     make cache for image features
     :param dataset_path: path to image dataset
-    :param dbname: name of sqliteDB(TODO)
+    :param dbpath: path of database file
     :return: None
     """
 
     import numpy as np
     import h5py
     import os
-    import sqlite3
+    # import sqlite3
     from modules.CNNCBIR.CreateMobileNet import initMobileNet, extract_feat
     dbname = dbpath + "/index.sqlite"
     if os.path.exists(dbname):
         os.remove(dbname)
-    conn = sqlite3.connect(dbname)
-    cursor = conn.cursor()
-
-    cursor.execute('''CREATE TABLE CNN_CACHE
-           (
-           NAME           TEXT    NOT NULL,
-           FEATURE        blob   NOT NULL 
-           );''')
-    conn.commit()
-    sql = "INSERT INTO CNN_CACHE (NAME,FEATURE) VALUES(?,?)"
+    # conn = sqlite3.connect(dbname)
+    # cursor = conn.cursor()
+    #
+    # cursor.execute('''CREATE TABLE CNN_CACHE
+    #        (
+    #        NAME           TEXT    NOT NULL,
+    #        FEATURE        blob   NOT NULL
+    #        );''')
+    # conn.commit()
+    # sql = "INSERT INTO CNN_CACHE (NAME,FEATURE) VALUES(?,?)"
     img_list = list()
     get_imlist(dataset_path, img_list)
     # print(img_list);exit(0)
@@ -122,10 +122,10 @@ def initCNNCache(dataset_path="dataset", dbpath=".") -> None:
         feats.append(norm_feat)
         # names.append(img_name)
         names.append(img_path)
-        cursor.execute(sql, (img_path, norm_feat.tobytes()))
+        # cursor.execute(sql, (img_path, norm_feat.tobytes()))
         print("\rextracting feature from image No. {} , {} images in total".format((i + 1), len(img_list)), end='')
-    conn.commit()
-    conn.close()
+    # conn.commit()
+    # conn.close()
     feats = np.array(feats)
     # print(feats)
     # directory for storing extracted features

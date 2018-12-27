@@ -4,7 +4,10 @@ from django.views.decorators.csrf import csrf_exempt
 import json
 import os
 import tempfile
+import cv2
 import main.makecache as makecache
+from main.models import cache
+from main.img_preprocess import preprocess
 
 
 @csrf_exempt
@@ -30,20 +33,28 @@ def upload_pic(request):
 
             # Compute
             # ===============================
-            if preprocessMethod == 'X':
+            # Preprocess
+            if preprocessMethod == 'hist_canny':
+                usr_img = preprocess(cv2.imread(path, 1))
+
+            # Similarity
+            if similarityCalculationMethod == 'vector':
                 pass
-            elif preprocessMethod == 'Y':
+            elif similarityCalculationMethod == 'cnn':
                 pass
 
-            if featureExtractionMethod == 'A':
+            # FeatureExtraction
+            if featureExtractionMethod == 'color':
+                return_img = 'x'
+            elif featureExtractionMethod == 'texture':
                 pass
-            elif featureExtractionMethod == 'B':
+            elif featureExtractionMethod == 'shape':
                 pass
 
-            if similarityCalculationMethod == 'M':
+            # ObjectDetection
+            if positionMethod == 'od':
                 pass
-            elif similarityCalculationMethod == 'N':
-                pass
+
             # ===============================
 
             # Generate the json

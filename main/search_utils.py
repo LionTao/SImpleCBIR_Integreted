@@ -33,4 +33,7 @@ def vec_search(imgpath: str, feats: np.ndarray, names: list, k=3):
         for j in range(20):
             temp[i] = (cv2.compareHist(v[j], feats[i][j], cv2.HISTCMP_BHATTACHARYYA))
         res[i] = np.linalg.norm(temp) / 20
-    print(res.argsort(res))
+    rank_ID = np.argsort(res)
+    namelist = [names[index] for index in rank_ID[0:k]]
+    print(namelist)
+    return namelist

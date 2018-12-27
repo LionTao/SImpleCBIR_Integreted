@@ -21,10 +21,9 @@ def ObjDetect(path: str):
 
 
 def vec_search(imgpath: str, feats: np.ndarray, names: list, k=3):
-    # print(feats.shape);
-    # exit()
     from modules.ImageFeatureVector.HistogramVector.hisvec import get_vector
     import cv2
+    assert feats[0].shape == (20, 256, 1)
     v = get_vector(imgpath)
     nums = feats.shape[0]
     res = np.empty(nums)
@@ -35,5 +34,4 @@ def vec_search(imgpath: str, feats: np.ndarray, names: list, k=3):
         res[i] = np.linalg.norm(temp) / 20
     rank_ID = np.argsort(res)
     namelist = [names[index] for index in rank_ID[0:k]]
-    print(namelist)
     return namelist

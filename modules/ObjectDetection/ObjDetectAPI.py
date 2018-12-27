@@ -2,15 +2,15 @@ from modules.ObjectDetection.opencvdnn import do_object_detection as detect
 import os
 
 
-def obj_dection(path, network="MobileNet", modelDir="."):
+def obj_dection(path, network="MobileNet", dir=""):
     import requests
     if network == "MobileNet":
-        prototxt = modelDir + "/MobileNetSSD_deploy.prototxt.txt"
-        model = modelDir + "/MobileNetSSD_deploy.caffemodel"
+        prototxt = dir + "MobileNetSSD_deploy.prototxt.txt"
+        model = dir + "MobileNetSSD_deploy.caffemodel"
     else:
         raise Exception("Network not provided")
 
-    if not os.path.isfile(prototxt):
+    if not os.path.exists(prototxt):
         file_url = "http://media.liontao.xin/MobileNetSSD_deploy.prototxt.txt?attname=&e=1545901370&token=8D-fPY7fZfvNQ_YlcCHphmf-beQ7s5-ahx1C_WJ4:eJEMiBlqucJesL3efchu7cHW7gU"
         file_path = prototxt
 
@@ -18,7 +18,7 @@ def obj_dection(path, network="MobileNet", modelDir="."):
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36"}
         with closing(requests.get(file_url, headers=headers, stream=True)) as response:
-            chunk_size = 1024
+            chunk_size = 100
             content_size = int(response.headers['content-length'])
             data_count = 0
             with open(file_path, "wb") as file:
@@ -30,9 +30,9 @@ def obj_dection(path, network="MobileNet", modelDir="."):
                           end="")
             print("\r\n[INFO]Download Completed.")
 
-    if not os.path.isfile(model):
+    if not os.path.exists(model):
         file_url = "http://media.liontao.xin/MobileNetSSD_deploy.caffemodel?attname=&e=1545901361&token=8D-fPY7fZfvNQ_YlcCHphmf-beQ7s5-ahx1C_WJ4:8DDL7DJyP0qnQt4b-tHBx9OsHS4"
-        file_path = prototxt
+        file_path = model
 
         from contextlib import closing
         headers = {

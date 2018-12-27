@@ -159,3 +159,7 @@ venv.bak/
 # mypy
 .mypy_cache/
 /main/1.png
+/modules/ObjectDetection/MobileNetSSD_deploy.caffemodel
+/main/MobileNetSSD_deploy.prototxt.txt
+/modules/ObjectDetection/image.jpg
+/testRoot.py

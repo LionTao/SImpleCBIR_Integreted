@@ -163,3 +163,4 @@ venv.bak/
 /main/MobileNetSSD_deploy.prototxt.txt
 /modules/ObjectDetection/image.jpg
 /testRoot.py
+/main/migrations/

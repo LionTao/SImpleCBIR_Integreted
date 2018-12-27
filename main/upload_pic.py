@@ -4,6 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 import json
 import os
 import tempfile
+import main.makecache as makecache
 
 
 @csrf_exempt
@@ -19,12 +20,17 @@ def upload_pic(request):
             preprocessMethod = json_body['preprocessMethod']
             featureExtractionMethod = json_body['featureExtractionMethod']
             similarityCalculationMethod = json_body['similarityCalculationMethod']
+            targetDetectMethod = json_body['positionMethod']
             # ===============================
 
             # Dataset
             # ===============================
-            dataset_dir = '../modules/CBIRDataset/dataset'
-            
+            makecache.getDataset()
+            # ===============================
+
+            # Temp Dir
+            # ===============================
+            temp_dir = tempfile.gettempdir() + '/SimpleCBIR_ResultTemp/'
             # ===============================
 
             # Compute

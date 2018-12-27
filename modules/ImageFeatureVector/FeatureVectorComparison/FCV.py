@@ -31,6 +31,7 @@ def difference_between_image_vector(img: str, V: np.array) -> float:
     :param V: a 20-histograms array
     :return: a float number between 0(same) and 1(different)
     """
+
     _V = hv.get_vector(img)
     res = []
     for i in range(20):

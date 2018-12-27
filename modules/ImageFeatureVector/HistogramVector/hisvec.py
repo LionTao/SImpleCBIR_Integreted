@@ -72,7 +72,7 @@ def get_vector(file: str) -> numpy.array:
                 V.append(get_his(split_img) * W * a[l])
         length, width = length // 2, width // 2
         l += 1
-    return V
+    return numpy.array(V)
 
 
 def main():

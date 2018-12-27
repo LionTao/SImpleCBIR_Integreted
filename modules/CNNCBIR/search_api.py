@@ -149,8 +149,9 @@ def search_with_cnnData(path: str, feats: np.ndarray, imgNames: list, k=3):
     scores = np.dot(queryVec, feats.T)
     rank_ID = np.argsort(scores)[::-1]
     res = [imgNames[index] for i, index in enumerate(rank_ID[0:k])]
+    res_score = [scores[index] for i, index in enumerate(rank_ID[0:k])]
     print("top {} images in order are: ".format(k), res)
-    return res
+    return res,res_score
 
 
 if __name__ == '__main__':

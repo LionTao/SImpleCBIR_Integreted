@@ -1,4 +1,6 @@
 import tempfile
+
+
 import cv2
 import numpy as np
 
@@ -10,15 +12,13 @@ from modules.CNNCBIR.CreateMobileNet import extract_feat
 from modules.CNNCBIR.search_api import search
 
 
-def getDataset():
-    temp_dir = tempfile.gettempdir() + '/SimpleCBIR_ResultTemp/'
-    GetDataSet(des=temp_dir)
-    print("DataSet should be ready at ", temp_dir + '/dataset')
+def getDataset(des=''):
+    # des = tempfile.gettempdir() + '/SimpleCBIR_ResultTemp/'
+    GetDataSet(des=des)
+    print("DataSet should be ready at ", des + "/dataset")
 
 
-"""
-@Deprecated
-"""
+# @Deprecated
 def initCNNCBIR(dbpath):
     temp_dir = tempfile.gettempdir() + '/SimpleCBIR_ResultTemp/'
     initCNNCache(dataset_path=temp_dir, dbpath=temp_dir)

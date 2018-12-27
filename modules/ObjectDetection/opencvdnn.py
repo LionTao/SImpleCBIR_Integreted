@@ -5,6 +5,14 @@ import cv2
 
 def do_object_detection(path, prototxt="MobileNetSSD_deploy.prototxt.txt", model="MobileNetSSD_deploy.caffemodel",
                         confidence_threshold=0.4):
+    """
+
+    :param path: image path
+    :param prototxt: model prototxt
+    :param model: caffe modelfile
+    :param confidence_threshold:
+    :return: image and classname
+    """
     CLASSES = ["background", "aeroplane", "bicycle", "bird", "boat",
                "bottle", "bus", "car", "cat", "chair", "cow", "diningtable",
                "dog", "horse", "motorbike", "person", "pottedplant", "sheep",
@@ -29,7 +37,6 @@ def do_object_detection(path, prototxt="MobileNetSSD_deploy.prototxt.txt", model
     print("[INFO] computing object detections...")
     net.setInput(blob)
     detections = net.forward()
-
     # loop over the detections
     for i in np.arange(0, detections.shape[2]):
         # extract the confidence (i.e., probability) associated with the
@@ -60,15 +67,16 @@ def do_object_detection(path, prototxt="MobileNetSSD_deploy.prototxt.txt", model
 
             cv2.putText(image, label, (startX, y),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, COLORS[idx], 2)
+
+            # classname=CLASSES[idx]
             return image, CLASSES[idx]
 
-            # show the output image
-            # cv2.imshow("Output", image)
-            # cv2.imwrite("output.jpg", image)
-            # cv2.waitKey(0)
+    # no detection in confidence field
+    return image, "No target"
 
 
 if __name__ == '__main__':
-    image, label = do_object_detection(path="image.jpg")
-    cv2.imshow("result", image)
-    cv2.waitKey(0)
+    image, classname = do_object_detection(path="image.jpg")
+    print(classname)
+    # cv2.imshow("result", image)
+    # cv2.waitKey(0)

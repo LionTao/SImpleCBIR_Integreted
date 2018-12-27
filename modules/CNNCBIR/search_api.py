@@ -36,12 +36,13 @@ def search(imagepath: str, k: int, dbpath=".") -> list:
     from modules.CNNCBIR.CreateMobileNet import initMobileNet
 
     dbname = dbpath + "/index.sqlite"
-    if not os.path.exists(dbname):
-        raise Exception("Data Cache not initialized")
+
     conn = sqlite3.connect(dbname)
     cursor = conn.cursor()
 
     h5name = dbpath + "/index.h5"
+    if not os.path.exists(dbname) and not os.path.exists(h5name):
+        raise Exception("Data Cache not initialized")
     db = h5py.File(h5name, 'r')
     feats = db['dataset_1'][:]
     imgNames = db['dataset_2'][:]

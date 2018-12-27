@@ -51,16 +51,16 @@ def render_texture_bar_figure(texture_vector: list, path: str):
 if __name__ == '__main__':
     temp_dir = tempfile.gettempdir() + '/SimpleCBIR_ResultTemp/'
     getDataset()
-    initCNNCBIR(dbpath=temp_dir)
-    res = search(
-        imagepath="C:\\Users\\LionTao\\AppData\\Local\\Temp\\1\\SimpleCBIR_ResultTemp\\dataset\\art_1\\193000.jpg", k=3,
-        dbpath="C:\\Users\\LionTao\\AppData\\Local\\Temp\\1\\SimpleCBIR_ResultTemp")
-    print(res)
-    res = make_image_cache(
-        "C:\\Users\\LionTao\\AppData\\Local\\Temp\\1\\SimpleCBIR_ResultTemp\\dataset\\art_1\\193001.jpg")
-    print(res[3])
-
-    cv2.imshow("texture", res[3])
-    cv2.waitKey(0)
-
-    print(render_texture_bar_figure(res[3], "1.png"))
+    # initCNNCBIR(dbpath=temp_dir)
+    # res = search(
+    #     imagepath="C:\\Users\\LionTao\\AppData\\Local\\Temp\\1\\SimpleCBIR_ResultTemp\\dataset\\art_1\\193000.jpg", k=3,
+    #     dbpath="C:\\Users\\LionTao\\AppData\\Local\\Temp\\1\\SimpleCBIR_ResultTemp")
+    # print(res)
+    # res = make_image_cache(
+    #     "C:\\Users\\LionTao\\AppData\\Local\\Temp\\1\\SimpleCBIR_ResultTemp\\dataset\\art_1\\193001.jpg")
+    # print(res[3])
+    #
+    # cv2.imshow("texture", res[3])
+    # cv2.waitKey(0)
+    #
+    # print(render_texture_bar_figure(res[3], "1.png"))

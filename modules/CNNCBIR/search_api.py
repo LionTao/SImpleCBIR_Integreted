@@ -1,3 +1,6 @@
+import numpy as np
+
+
 def get_imlist(path, res: list) -> None:
     """
     search for jpeg recursively in the given folder
@@ -32,8 +35,7 @@ def search(imagepath: str, k: int, dbpath=".") -> list:
 
     # import matplotlib.pyplot as plt
     # import matplotlib.image as mpimg
-    from modules.CNNCBIR.CreateMobileNet import extract_feat
-    from modules.CNNCBIR.CreateMobileNet import initMobileNet
+    from modules.CNNCBIR.CreateMobileNet import extract_feat, initMobileNet
 
     dbname = dbpath + "/index.sqlite"
 
@@ -93,7 +95,7 @@ def initCNNCache(dataset_path="dataset", dbpath=".") -> None:
     import os
     # import sqlite3
     from modules.CNNCBIR.CreateMobileNet import initMobileNet, extract_feat
-    #dbname = dbpath + "/index.sqlite"
+    # dbname = dbpath + "/index.sqlite"
     # if os.path.exists(dbname):
     #     os.remove(dbname)
     # conn = sqlite3.connect(dbname)
@@ -139,6 +141,16 @@ def initCNNCache(dataset_path="dataset", dbpath=".") -> None:
     # h5f.create_dataset('dataset_2', data = names)
     h5f.create_dataset('dataset_2', data=np.string_(names))
     h5f.close()
+
+
+def search_with_cnnData(path: str, feats: np.ndarray, imgNames: list, k=3):
+    from modules.CNNCBIR.CreateMobileNet import initMobileNet, extract_feat
+    queryVec = extract_feat(model=initMobileNet(), img_path=path)
+    scores = np.dot(queryVec, feats.T)
+    rank_ID = np.argsort(scores)[::-1]
+    res = [imgNames[index] for i, index in enumerate(rank_ID[0:k])]
+    print("top {} images in order are: ".format(k), res)
+    return res
 
 
 if __name__ == '__main__':

@@ -20,6 +20,7 @@ def convert_array(text):
     out.seek(0)
     return np.load(out)
 
+
 @csrf_exempt
 def upload_pic(request):
     return_message = dict()
@@ -50,7 +51,7 @@ def upload_pic(request):
             if preprocessMethod == '1-A':  # hist_canny
                 usr_img = cv2.imread(path, 1)
                 usr_img_pre = preprocess(usr_img)
-                print("[DEBUG] preprocess dunc call done")
+                print("[DEBUG] preprocess func call done")
                 usr_img_pre_dir = temp_dir + 'usr_img_pre.jpg'
                 cv2.imwrite(usr_img_pre_dir, usr_img_pre)
 
@@ -67,15 +68,16 @@ def upload_pic(request):
             res_num = 3
 
             # feats = cache.objects.values('cnn')
-            if similarityCalculationMethod == 'vector':
+            if similarityCalculationMethod == '4-A':
                 rawData = cache.objects.values_list('path', 'vector')
-                imgNames,feats= list(),list()
+                imgNames, feats = list(), list()
                 for element in rawData:
                     imgNames.append(element[0])
                     feats.append(convert_array(element[1]).reshape((20, 256, 1)))
                 feats = np.array(feats)
                 result, score = search_utils.vec_search(usr_img_pre_dir, feats, imgNames, res_num)
-            elif similarityCalculationMethod == '4-A':
+                score = [1 - i for i in score]  # 0 means same, 1 for different
+            elif similarityCalculationMethod == '4-B':
                 rawData = cache.objects.values_list('path', 'cnn')
                 imgNames, feats = list(), list()
                 for element in rawData:
@@ -97,6 +99,7 @@ def upload_pic(request):
             else:
                 raise Exception("Object Detection Method Unknown.")
 
+            print("[DEBUG] User image OD done :", catagory)
             # Feature Extraction + OD
             if featureExtractionMethod == '2-A':  # FOO_BAR
                 pass
@@ -104,8 +107,10 @@ def upload_pic(request):
                 db_dict = list(cache.objects.filter(path=result[i]).values())[0]
                 # search_utils.render_color_bar_figure(db_dict['color'], temp_dir + 'color{}.jpg'.format(i + 1))
                 # search_utils.render_texture_bar_figure(db_dict['texture'], temp_dir + 'texture{}.jpg'.format(i + 1))
-                search_utils.render_color_bar_figure(feature_color(cv2.imread(db_dict['path'])), temp_dir + 'color{}.jpg'.format(i + 1))
-                search_utils.render_texture_bar_figure(feature_texture(cv2.imread(db_dict['path'])), temp_dir + 'texture{}.jpg'.format(i + 1))
+                search_utils.render_color_bar_figure(feature_color(cv2.imread(db_dict['path'])),
+                                                     temp_dir + 'color{}.jpg'.format(i + 1))
+                search_utils.render_texture_bar_figure(feature_texture(cv2.imread(db_dict['path'])),
+                                                       temp_dir + 'texture{}.jpg'.format(i + 1))
                 cv2.imwrite(temp_dir + 'shape{}.jpg'.format(i + 1), feature_shape(cv2.imread(db_dict['path'])))
                 od_temp, _ = search_utils.ObjDetect(result[i])
                 cv2.imwrite(temp_dir + 'position{}.jpg'.format(i + 1), od_temp)
@@ -130,6 +135,7 @@ def upload_pic(request):
             features['texture'] = temp_dir + 'usr_img_texture.jpg'  # path of the generated image
             features['shape'] = temp_dir + 'usr_img_shape.jpg'  # path of the generated image
             return_message['features'] = features
+            features['position'] = temp_dir + 'usr_objd.jpg'  # path of the target marked image
 
             # 5
             results = dict()
@@ -156,7 +162,7 @@ def upload_pic(request):
             # 5.3
             three = dict()
             three['similarity'] = score[2].astype(float)
-            three['path'] = temp_dir + 'res1.jpg'
+            three['path'] = temp_dir + 'res3.jpg'
             three_features = dict()
             three_features['color'] = temp_dir + 'color3.jpg'
             three_features['texture'] = temp_dir + 'texture3.jpg'

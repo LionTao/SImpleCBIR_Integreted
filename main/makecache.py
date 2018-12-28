@@ -20,6 +20,7 @@ import time
 import io
 import sqlite3
 
+
 tf_config = tensorflow.ConfigProto()
 tf_config.gpu_options.allow_growth = True
 session = tensorflow.Session(config=tf_config)
@@ -58,7 +59,7 @@ def cacheAll():
     filepaths = list()
     for root, dirs, files in os.walk("dataset", topdown=False):
         for name in files:
-            filepaths.append(os.path.join(os.path.abspath(root), name))
+            filepaths.append(os.path.join(root, name))
         # for name in dirs:
         #     print(os.path.join(root, name))
 

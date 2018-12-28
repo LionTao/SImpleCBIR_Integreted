@@ -38,6 +38,7 @@ def upload_pic(request):
             positionMethod = json_body['positionMethod']
             # ===============================
             print("[DEBUG] decode done")
+
             # Temp Dir
             # ===============================
             temp_dir = tempfile.gettempdir() + '/SimpleCBIR_ResultTemp/'
@@ -45,6 +46,7 @@ def upload_pic(request):
                 os.mkdir(temp_dir)
             # ===============================
             print("[DEBUG] tempdir done")
+
             # Compute
             # ===============================
             # Preprocess
@@ -64,9 +66,9 @@ def upload_pic(request):
             else:
                 raise Exception("Preprocess Method Unknown.")
             print("[DEBUG] process done")
-            # Similarity
-            res_num = 3
 
+            # Similarity
+            res_num = 150
             # feats = cache.objects.values('cnn')
             if similarityCalculationMethod == '4-A':
                 rawData = cache.objects.values_list('path', 'vector')
@@ -76,7 +78,20 @@ def upload_pic(request):
                     feats.append(convert_array(element[1]).reshape((20, 256, 1)))
                 feats = np.array(feats)
                 result, score = search_utils.vec_search(usr_img_pre_dir, feats, imgNames, res_num)
+                cnn_result, _ = search_api.search_with_cnnData(usr_img_pre_dir, feats, imgNames,
+                                                               1)  # For getting the right category of the user picture
+                category = os.path.split(cnn_result[0])[0].split(r'\\')[-1]
                 score = [1 - i for i in score]  # 0 means same, 1 for different
+
+                # Calculate precision and recall
+                correct_number = 0
+                for i in range(res_num):
+                    cate_temp = os.path.split(result[i])[0].split(r'\\')[-1]
+                    if cate_temp == category:
+                        correct_number += 1
+                precision = correct_number / res_num  # 查准率
+                recall = correct_number / 100  # 查全率
+
             elif similarityCalculationMethod == '4-B':
                 rawData = cache.objects.values_list('path', 'cnn')
                 imgNames, feats = list(), list()
@@ -85,25 +100,36 @@ def upload_pic(request):
                     feats.append(convert_array(element[1]))
                 feats = np.array(feats)
                 result, score = search_api.search_with_cnnData(usr_img_pre_dir, feats, imgNames, res_num)
+                category = os.path.split(result[0])[0].split(r'\\')[-1]
+
+                # Calculate precision and recall
+                correct_number = 0
+                for i in range(res_num):
+                    cate_temp = os.path.split(result[i])[0].split(r'\\')[-1]
+                    if cate_temp == category:
+                        correct_number += 1
+                precision = correct_number / res_num  # 查准率
+                recall = correct_number / 100  # 查全率
+
             else:
                 raise NotImplementedError("Similarity Method not Implemented")
 
-            for i in range(res_num):
+            for i in range(3):
                 cv2.imwrite(temp_dir + "res{}.jpg".format(i + 1), cv2.imread(result[i]))
             print("[DEBUG] similarity done")
 
             # ObjectDetection
             if positionMethod == '3-A':
-                objd_image, catagory = search_utils.ObjDetect(usr_img_pre_dir)
+                objd_image, od_category = search_utils.ObjDetect(usr_img_pre_dir)
                 cv2.imwrite(temp_dir + 'usr_objd.jpg', objd_image)
             else:
                 raise Exception("Object Detection Method Unknown.")
+            print("[DEBUG] User image OD done :", od_category)
 
-            print("[DEBUG] User image OD done :", catagory)
             # Feature Extraction + OD
             if featureExtractionMethod == '2-A':  # FOO_BAR
                 pass
-            for i in range(res_num):
+            for i in range(3):
                 db_dict = list(cache.objects.filter(path=result[i]).values())[0]
                 # search_utils.render_color_bar_figure(db_dict['color'], temp_dir + 'color{}.jpg'.format(i + 1))
                 # search_utils.render_texture_bar_figure(db_dict['texture'], temp_dir + 'texture{}.jpg'.format(i + 1))
@@ -123,10 +149,12 @@ def upload_pic(request):
             # ===============================
             # 0
             return_message['rawImage'] = usr_img_pre_dir  # the raw path
+            # 0.5
+            return_message['category'] = category  # 猜测的图片类别
             # 1
-            return_message['recallRatio'] = 'FOO'  # "92.5%" 查全率
+            return_message['recallRatio'] = recall  # "92.5%" 查全率
             # 2
-            return_message['precision'] = 'FOO'  # "87.5%" 查准率
+            return_message['precision'] = precision  # "87.5%" 查准率
             # 3
             return_message['position'] = temp_dir + 'usr_objd.jpg'  # path of the target marked image
             # 4

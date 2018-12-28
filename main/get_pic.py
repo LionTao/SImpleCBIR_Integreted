@@ -3,6 +3,7 @@ from django.http import HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
 
 
+# Deprecated
 @csrf_exempt
 def get_pic(request):
     return_message = str()

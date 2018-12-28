@@ -6,7 +6,7 @@ import os
 import tempfile
 import cv2
 from main.models import cache
-from main.img_preprocess import preprocess
+from main.img_preprocess import preprocess_a, preprocess_b
 from modules.CNNCBIR import search_api
 import main.search_utils as search_utils
 import numpy as np
@@ -50,9 +50,22 @@ def upload_pic(request):
             # Compute
             # ===============================
             # Preprocess
-            if preprocessMethod == '1-A':  # hist_canny
+            if preprocessMethod == '1-A':  # hist + 平滑
                 usr_img = cv2.imread(path, 1)
-                usr_img_pre = preprocess(usr_img)
+                usr_img_pre = preprocess_a(usr_img)
+                print("[DEBUG] preprocess func call done")
+                usr_img_pre_dir = temp_dir + 'usr_img_pre.jpg'
+                cv2.imwrite(usr_img_pre_dir, usr_img_pre)
+
+                # following func accept image array not path
+                search_utils.render_color_bar_figure(np.array(feature_color(img_in=usr_img_pre)),
+                                                     temp_dir + 'usr_img_color.jpg')
+                search_utils.render_texture_bar_figure(np.array(feature_texture(img_in=usr_img_pre)),
+                                                       temp_dir + 'usr_img_texture.jpg')
+                cv2.imwrite(temp_dir + 'usr_img_shape.jpg', np.array(feature_shape(img_in=usr_img_pre)))
+            elif preprocessMethod == '1-B':  # hist + 锐化
+                usr_img = cv2.imread(path, 1)
+                usr_img_pre = preprocess_b(usr_img)
                 print("[DEBUG] preprocess func call done")
                 usr_img_pre_dir = temp_dir + 'usr_img_pre.jpg'
                 cv2.imwrite(usr_img_pre_dir, usr_img_pre)

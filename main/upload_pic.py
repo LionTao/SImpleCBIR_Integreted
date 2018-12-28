@@ -78,20 +78,17 @@ def upload_pic(request):
                     feats.append(convert_array(element[1]).reshape((20, 256, 1)))
                 feats = np.array(feats)
                 result, score = search_utils.vec_search(usr_img_pre_dir, feats, imgNames, res_num)
-                cnn_result, _ = search_api.search_with_cnnData(usr_img_pre_dir, feats, imgNames,
+                # CNN part
+                cnn_rawData = cache.objects.values_list('path', 'cnn')
+                cnn_imgNames, cnn_feats = list(), list()
+                for element in cnn_rawData:
+                    cnn_imgNames.append(element[0])
+                    cnn_feats.append(convert_array(element[1]))
+                cnn_feats = np.array(cnn_feats)
+                cnn_result, _ = search_api.search_with_cnnData(usr_img_pre_dir, cnn_feats, cnn_imgNames,
                                                                1)  # For getting the right category of the user picture
                 category = os.path.split(cnn_result[0])[0].split(r'\\')[-1]
                 score = [1 - i for i in score]  # 0 means same, 1 for different
-
-                # Calculate precision and recall
-                correct_number = 0
-                for i in range(res_num):
-                    cate_temp = os.path.split(result[i])[0].split(r'\\')[-1]
-                    if cate_temp == category:
-                        correct_number += 1
-                precision = correct_number / res_num  # 查准率
-                recall = correct_number / 100  # 查全率
-
             elif similarityCalculationMethod == '4-B':
                 rawData = cache.objects.values_list('path', 'cnn')
                 imgNames, feats = list(), list()
@@ -101,19 +98,19 @@ def upload_pic(request):
                 feats = np.array(feats)
                 result, score = search_api.search_with_cnnData(usr_img_pre_dir, feats, imgNames, res_num)
                 category = os.path.split(result[0])[0].split(r'\\')[-1]
-
-                # Calculate precision and recall
-                correct_number = 0
-                for i in range(res_num):
-                    cate_temp = os.path.split(result[i])[0].split(r'\\')[-1]
-                    if cate_temp == category:
-                        correct_number += 1
-                precision = correct_number / res_num  # 查准率
-                recall = correct_number / 100  # 查全率
-
             else:
                 raise NotImplementedError("Similarity Method not Implemented")
 
+            # Calculate precision and recall
+            correct_number = 0
+            for i in range(res_num):
+                cate_temp = os.path.split(result[i])[0].split(r'\\')[-1]
+                if cate_temp == category:
+                    correct_number += 1
+            precision = correct_number / res_num  # 查准率
+            recall = correct_number / 100  # 查全率
+
+            # Write result image to file
             for i in range(3):
                 cv2.imwrite(temp_dir + "res{}.jpg".format(i + 1), cv2.imread(result[i]))
             print("[DEBUG] similarity done")

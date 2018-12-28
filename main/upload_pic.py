@@ -87,7 +87,7 @@ def upload_pic(request):
                 cnn_feats = np.array(cnn_feats)
                 cnn_result, _ = search_api.search_with_cnnData(usr_img_pre_dir, cnn_feats, cnn_imgNames,
                                                                1)  # For getting the right category of the user picture
-                category = os.path.split(cnn_result[0])[0].split(r'\\')[-1]
+                category = os.path.split(cnn_result[0])[0].split("\\")[-1]
                 score = [1 - i for i in score]  # 0 means same, 1 for different
             elif similarityCalculationMethod == '4-B':
                 rawData = cache.objects.values_list('path', 'cnn')
@@ -97,14 +97,14 @@ def upload_pic(request):
                     feats.append(convert_array(element[1]))
                 feats = np.array(feats)
                 result, score = search_api.search_with_cnnData(usr_img_pre_dir, feats, imgNames, res_num)
-                category = os.path.split(result[0])[0].split(r'\\')[-1]
+                category = os.path.split(result[0])[0].split('\\')[-1]
             else:
                 raise NotImplementedError("Similarity Method not Implemented")
 
             # Calculate precision and recall
             correct_number = 0
             for i in range(res_num):
-                cate_temp = os.path.split(result[i])[0].split(r'\\')[-1]
+                cate_temp = os.path.split(result[i])[0].split('\\')[-1]
                 if cate_temp == category:
                     correct_number += 1
             precision = correct_number / res_num  # 查准率

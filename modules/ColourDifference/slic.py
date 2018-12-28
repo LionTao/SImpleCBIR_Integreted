@@ -4,8 +4,6 @@ import numpy as np
 
 import cv2
 import time
-from numba import jitclass,jit
-from numba.types import int32
 from colormath.color_objects import LabColor
 from colormath.color_diff import delta_e_cie2000
 
@@ -131,7 +129,7 @@ class SLICProcessor(object):
                     if new_gradient < cluster_gradient:
                         cluster.update(_h, _w, self.data[_h][_w][0], self.data[_h][_w][1], self.data[_h][_w][2])
                         cluster_gradient = new_gradient
-    @jit(parallel=True)
+
     def assignment(self):
         '''
         将图像中的每一个点划分到距离它最近的聚类中

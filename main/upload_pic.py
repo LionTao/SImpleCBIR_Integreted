@@ -50,7 +50,7 @@ def upload_pic(request):
             # Compute
             # ===============================
             # Preprocess
-            if preprocessMethod == '1-A':  # hist + 锐化
+            if preprocessMethod == '1-A':  # hist + 平滑
                 usr_img = cv2.imread(path, 1)
                 usr_img_pre = preprocess_a(usr_img)
                 print("[DEBUG] preprocess func call done")
@@ -63,7 +63,7 @@ def upload_pic(request):
                 search_utils.render_texture_bar_figure(np.array(feature_texture(img_in=usr_img_pre)),
                                                        temp_dir + 'usr_img_texture.jpg')
                 cv2.imwrite(temp_dir + 'usr_img_shape.jpg', np.array(feature_shape(img_in=usr_img_pre)))
-            elif preprocessMethod == '1-B':  # hist + 平滑
+            elif preprocessMethod == '1-B':  # hist + 锐化
                 usr_img = cv2.imread(path, 1)
                 usr_img_pre = preprocess_b(usr_img)
                 print("[DEBUG] preprocess func call done")

@@ -1,7 +1,7 @@
 import cv2
 
 
-def preprocess_a(img):
+def preprocess_b(img):
     # Histogram equalization ====
     ycrcb = cv2.cvtColor(img, cv2.COLOR_BGR2YCrCb)
     channels = cv2.split(ycrcb)
@@ -27,7 +27,7 @@ def preprocess_a(img):
     return img
 
 
-def preprocess_b(img):
+def preprocess_a(img):
     # Histogram equalization ====
     ycrcb = cv2.cvtColor(img, cv2.COLOR_BGR2YCrCb)
     channels = cv2.split(ycrcb)

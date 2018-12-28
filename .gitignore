@@ -165,3 +165,4 @@ venv.bak/
 /testRoot.py
 /main/migrations/
 /dataset/
+/venv/

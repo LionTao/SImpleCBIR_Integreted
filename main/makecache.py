@@ -1,7 +1,10 @@
 import tempfile
-
+import os
 import cv2
 import numpy as np
+
+# os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"   # see issue #152
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 from modules.CBIRDataset.getDataset import GetDataSet
 from modules.CNNCBIR.search_api import initCNNCache
@@ -11,8 +14,15 @@ from modules.CNNCBIR.CreateMobileNet import extract_feat
 from modules.CNNCBIR.search_api import search
 from modules.CNNCBIR.CreateMobileNet import initMobileNet
 from main.models import cache
-import os
-from multiprocessing import Process
+from queue import Queue
+import tensorflow
+import time
+import io
+import sqlite3
+
+tf_config = tensorflow.ConfigProto()
+tf_config.gpu_options.allow_growth = True
+session = tensorflow.Session(config=tf_config)
 
 
 def getDataset(des=''):
@@ -28,29 +38,23 @@ def initCNNCBIR(dbpath):
     print("Database Cached at", dbpath + "index.sqlite")
 
 
+def adapt_array(arr):
+    out = io.BytesIO()
+    np.save(out, arr)
+    out.seek(0)
+    return sqlite3.Binary(out.read())
+
+
 def make_image_cache(path, model):
     # vector
-
-    img = cv2.imread(path)
-
     vector = np.array(get_vector(file=path))
-    # colour
-    color = np.array(feature_color(img_in=img))
-    # shape
-    shape = np.array(feature_shape(img_in=img))
-    # texture
-    texture = np.array(feature_texture(img_in=img))
     norm_feat = extract_feat(model=model, img_path=path)
-    res = {'path': path, 'vector': vector.tobytes(), 'color': color.tobytes(), 'shape': shape.tobytes(),
-           'texture': texture.tobytes(), 'cnn': norm_feat.tobytes()}
-    # return [path, vector, color, shape, texture, norm_feat]
+    res = {'path': path, 'vector': adapt_array(vector), 'cnn': adapt_array(norm_feat)}
     return res
 
 
 def cacheAll():
     # from main.makecache import getDataset, make_image_cache
-
-    model = initMobileNet()
     filepaths = list()
     for root, dirs, files in os.walk("dataset", topdown=False):
         for name in files:
@@ -58,28 +62,26 @@ def cacheAll():
         # for name in dirs:
         #     print(os.path.join(root, name))
 
+    # q = Queue()
+    model = initMobileNet()
+    i = 0
     for file in filepaths:
-        pro_list = []
+        i += 1
+        t = time.time()
+        # pro_list = []
         if cache.objects.filter(path=file).count() > 0:
-            print("existed")
+            print("\r{:.2f}% existed".format(i / len(filepaths) * 100), end='')
             continue
         else:
-            p = Process(target=cache_subfunc, args=(file, model,))
-            p.start()
-            pro_list.append(p)
-        for p in pro_list:
-            p.join()
-        print("Cache Done")
-
-
-def cache_subfunc(file, model):
-    r = make_image_cache(file, model=model)
-    try:
-        cache.objects.create(**r)
-    except Exception as e:
-        print(e)
-        cache.objects.filter(**r).update(**r)
-    print(file)
+            r = make_image_cache(file, model=model)
+            try:
+                cache.objects.create(**r)
+                print("\r" + file + " Progress:{:.2f}%".format(i / len(filepaths) * 100) + " ETA:{:.1f}min".format(
+                    (time.time() - t) * (len(filepaths) - i) / 60), end='')
+            except Exception as e:
+                print(e)
+                cache.objects.filter(path=r["path"]).update(**r)
+    print("\nCache Done")
 
 
 if __name__ == '__main__':

@@ -4,15 +4,32 @@ import numpy as np
 
 import cv2
 import time
-
+from numba import jitclass,jit
+from numba.types import int32
 from colormath.color_objects import LabColor
 from colormath.color_diff import delta_e_cie2000
 
+
+# spec = [
+#     ('h', int32),               # a simple scalar field
+#     ('w',int32),
+#     ('l',int32),
+#     ('a',int32),
+#     ('b',int32),
+#     ('pixels',dict),
+#     ('no',int32)
+# ]
+
+# @jitclass(spec)
 class Cluster(object):
     cluster_index = 1
 
     def __init__(self, h, w, l=0, a=0, b=0):
-        self.update(h, w, l, a, b)
+        self.h = h
+        self.w = w
+        self.l = l
+        self.a = a
+        self.b = b
         self.pixels = {}
         self.no = self.cluster_index
         Cluster.cluster_index += 1
@@ -23,6 +40,7 @@ class Cluster(object):
         self.l = l
         self.a = a
         self.b = b
+
 
 class SLICProcessor(object):
     @staticmethod
@@ -51,8 +69,8 @@ class SLICProcessor(object):
         # cv2.imwrite(path,bgr_arr)
 
     def make_cluster(self, h, w):
-        h=int(h)
-        w=int(w)
+        h = int(h)
+        w = int(w)
         return Cluster(h, w,
                        self.data[h][w][0],
                        self.data[h][w][1],
@@ -113,19 +131,19 @@ class SLICProcessor(object):
                     if new_gradient < cluster_gradient:
                         cluster.update(_h, _w, self.data[_h][_w][0], self.data[_h][_w][1], self.data[_h][_w][2])
                         cluster_gradient = new_gradient
-
+    @jit(parallel=True)
     def assignment(self):
         '''
         将图像中的每一个点划分到距离它最近的聚类中
         '''
-        l=len(self.clusters)
-        count=0
+        l = len(self.clusters)
+        count = 0
         for cluster in self.clusters:
             # print('%.2f'%(count/l))
-            count+=1
-            for h in range(cluster.h - 2 * self.S, cluster.h + 2 * self.S):
+            count += 1
+            for h in range(cluster.h - self.S, cluster.h + self.S):  # cluster.h - 2 * self.S, cluster.h + 2 * self.S
                 if h < 0 or h >= self.image_height: continue
-                for w in range(cluster.w - 2 * self.S, cluster.w + 2 * self.S):
+                for w in range(cluster.w - self.S, cluster.w + self.S):
                     if w < 0 or w >= self.image_width: continue
                     L, A, B = self.data[h][w]
                     Dc = math.sqrt(
@@ -139,11 +157,11 @@ class SLICProcessor(object):
                     if D < self.dis[h][w]:
                         if (h, w) not in self.label:
                             self.label[(h, w)] = cluster
-                            cluster.pixels[(h, w)]=1
+                            cluster.pixels[(h, w)] = 1
                         else:
-                            self.label[(h, w)].pixels[(h,w)]=0
+                            self.label[(h, w)].pixels[(h, w)] = 0
                             self.label[(h, w)] = cluster
-                            cluster.pixels[(h,w)]=1
+                            cluster.pixels[(h, w)] = 1
                         self.dis[h][w] = D
 
     def update_cluster(self):
@@ -154,7 +172,7 @@ class SLICProcessor(object):
         for cluster in self.clusters:
             sum_h = sum_w = number = 0
             for p in cluster.pixels.keys():
-                if(cluster.pixels[p]==0):
+                if (cluster.pixels[p] == 0):
                     continue
                 sum_h += p[0]
                 sum_w += p[1]
@@ -176,7 +194,7 @@ class SLICProcessor(object):
 
         self.save_lab_image(name, image_arr)
 
-    def iterate_ntimes(self,n=1):
+    def iterate_ntimes(self, n=1):
         """
         迭代n次，默认一次，并保存最终特征提取后的结果
         """
@@ -185,45 +203,44 @@ class SLICProcessor(object):
         for i in range(n):
             self.assignment()
             self.update_cluster()
-        #self.save_current_image('1.png')
+        # self.save_current_image('1.png')
 
-    def get_color_difference(self,ord=2):
+    def get_color_difference(self, ord=2):
         '''
         计算每个聚类与其他聚类的色差范式结果，默认为均方差
         '''
-        paradigm_lists=[]
+        paradigm_lists = []
         for i, cluster1 in enumerate(self.clusters):
-            paradigm_list=[]
+            paradigm_list = []
             color1 = LabColor(cluster1.l, cluster1.a, cluster1.b)
             for j, cluster2 in enumerate(self.clusters):
                 if (i == j):
                     continue
                 color2 = LabColor(cluster2.l, cluster2.a, cluster2.b)
-                paradigm_list.append( delta_e_cie2000(color1, color2, Kl=1, Kc=1, Kh=1))
-            paradigm_lists.append(np.linalg.norm(paradigm_list,ord=ord))
+                paradigm_list.append(delta_e_cie2000(color1, color2, Kl=1, Kc=1, Kh=1))
+            paradigm_lists.append(np.linalg.norm(paradigm_list, ord=ord))
         return paradigm_lists
 
-    def get_eachpixel_difference(self,ord=2):
+    def get_eachpixel_difference(self, ord=2):
         '''
         计算每个像素的色差范式结果，默认为均方差
         '''
-        difference_list=[]
+        difference_list = []
         for row in range(self.image_height):
-            sub_list=[]
+            sub_list = []
             for column in range(self.image_width):
                 sub_list.append(0)
             difference_list.append(sub_list)
 
-        sum_list=self.get_color_difference(ord)
-        for i,cluster in enumerate(self.clusters):
+        sum_list = self.get_color_difference(ord)
+        for i, cluster in enumerate(self.clusters):
             for p in cluster.pixels.keys():
-                difference_list[p[0]][p[1]] =sum_list[i]
+                difference_list[p[0]][p[1]] = sum_list[i]
 
         return difference_list
 
 
-
-def get_simliarity(p1_l,p2_l):
+def get_simliarity(p1_l, p2_l):
     """
     计算两图片相似度，色差的方差，值越小越相似
     """
@@ -235,18 +252,19 @@ def get_simliarity(p1_l,p2_l):
         sum += math.pow((p1_l[i] - p2_l[i]), 2)
     return math.sqrt(sum)
 
+
 if __name__ == '__main__':
-    name1='13000.jpeg'
+    name1 = '13000.jpeg'
     p1 = SLICProcessor(name1, 64)
     p1.iterate_ntimes()
     p1_l = p1.get_color_difference()
-    p1_l_eachpixel=p1.get_eachpixel_difference()
+    p1_l_eachpixel = p1.get_eachpixel_difference()
     print(p1_l)
     print(p1_l_eachpixel)
     print(len(p1_l_eachpixel))
     print(len(p1_l_eachpixel[0]))
-    #p='Corel5k/13000/'
-    #p1_sim=[]
+    # p='Corel5k/13000/'
+    # p1_sim=[]
     # for i in range(13000,13020):
     #     print(i)
     #     name2=p+str(i)+'.jpeg'

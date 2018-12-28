@@ -23,7 +23,10 @@ def ObjDetect(path: str):
 def vec_search(imgpath: str, feats: np.ndarray, names: list, k=3):
     from modules.ImageFeatureVector.HistogramVector.hisvec import get_vector
     import cv2
-    assert feats[0].shape == (20, 256, 1)
+    try:
+        assert feats[0].shape == (20, 256, 1)
+    except:
+        raise Exception("assert feats shape failed", "expect (20, 256, 1)", " got ", feats[0].shape, " instead")
     v = get_vector(imgpath)
     nums = feats.shape[0]
     res = np.empty(nums)

@@ -3,8 +3,10 @@ import numpy
 import modules.ColourDifference.slic as slic
 # import modules.ImageFeatureExtract as ife
 import modules.PatternDifference.ImProj as imp
+from numba import jit, prange
 
 
+@jit
 def get_guass(shape: tuple) -> numpy.array:
     """
     :param shape: the shape of matrix
